@@ -20,8 +20,8 @@ disp(['The ideal distance from start to goal: ', num2str(dis_ideal)]);
 %% The ideal position of drone
 start = model.start;
 goal = model.goal;
-for i = 1:num_uavs-1
-    pos = start + (goal-start)/(num_uavs-1)*i;
+for i = 1:num_uavs
+    pos = start + (goal-start)/num_uavs*i;
     disp(['The ideal position of uav ', num2str(i) ': ', num2str(pos)]);
 end
 
@@ -35,16 +35,25 @@ angle = atan2(goal(2)-start(2), goal(1)-start(1));
 disp(['The ideal angle is ', num2str(angle)]);
 
 %% The actual angle
-for i= 1:num_uavs-1
-    angle = atan2(uavs(i+1).position(2)-uavs(i).position(2),...
-                    uavs(i+1).position(1)-uavs(i).position(1));
+for i= 1:num_uavs
+    if i == 1
+        angle = atan2(uavs(i).position(2)-model.start(2),...
+                    uavs(i).position(1)-model.start(1));
+    else
+        angle = atan2(uavs(i).position(2)-uavs(i-1).position(2),...
+                        uavs(i).position(1)-uavs(i-1).position(1));
+    end
     disp(['The actual angle of UAV ', num2str(i) ': ', num2str(angle);])
 end
 
 %% The link length
 len = 0;
-for i= 1:num_uavs-1
-    link = norm(uavs(i+1).position-uavs(i).position);
+for i= 1:num_uavs
+    if i == 1
+        link = norm(uavs(i).position-model.start);
+    else
+        link = norm(uavs(i).position-uavs(i-1).position);
+    end
     len = len + link;
     disp(['The actual link of UAV ', num2str(i) ': ', num2str(link)])
 end

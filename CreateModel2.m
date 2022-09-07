@@ -24,7 +24,7 @@ function model=CreateModel2()
     x2 = 600; y2 = 400; z2 = 150; % center
 
     R3=35;  % Radius
-    x3 = 500; y3 = 350; z3 = 150; % center
+    x3 = 430; y3 = 410; z3 = 150; % center
 
     R4=40;  % Radius
     x4 = 300; y4 = 200; z4 = 150; % center
@@ -48,7 +48,7 @@ function model=CreateModel2()
     x10 = 650; y10 = 650; z10 = 150; % center
     
     R11=30;  % Radius
-    x11 = 400; y11 = 680; z11 = 150; % center
+    x11 = 500; y11 = 800; z11 = 150; % center
     
     R12=45;  % Radius
     x12 = 800; y12 = 400; z12 = 150; % center
@@ -72,7 +72,7 @@ function model=CreateModel2()
 %         goals(i,3) = goals(i,3) + H(round(goals(i,2)),round(goals(i,1)));
 %     end
 
-    goal = [900,800,150];
+    goal = [800,850,150];
     goal(3) = goal(3) + H(round(goal(2)),round(goal(1)));
     
     % Incorporate map and searching parameters to a model
@@ -96,7 +96,7 @@ function model=CreateModel2()
         x5 y5 z5 R5;x6 y6 z6 R6; x7 y7 z7 R7; x8 y8 z8 R8; x9 y9 z9 R9; ...
         x10 y10 z10 R10; x11 y11 z11 R11; x12 y12 z12 R12; x13 y13 z13 R13; ...
         x14 y14 z14 R14];
-    
+%     PlotTopView(0,model)
 end
 
 

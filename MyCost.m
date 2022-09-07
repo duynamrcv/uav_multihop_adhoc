@@ -2,7 +2,7 @@
 % Calculate path cost
 %
 
-function cost=MyCost(sol,currentState,target,model,varmax,varmin)
+function cost=MyCost(sol,start,currentState,target,model,varmax,varmin)
 %MyCost(x,currentState,target,model,VarMax); 
     
     J_inf = inf;
@@ -25,7 +25,8 @@ function cost=MyCost(sol,currentState,target,model,varmax,varmin)
     threat_num = size(threats,2);
     
     drone_size = 1.0;
-    danger_dist = 15*drone_size;
+    offset = 10.0;
+    danger_dist = 10*drone_size;
     
     F1 = 0;
     for i = 1:threat_num
@@ -33,30 +34,20 @@ function cost=MyCost(sol,currentState,target,model,varmax,varmin)
         threat_y = threats(i).y;
         threat_radius = threats(i).radius;
         dist = norm([x y]-[threat_x threat_y]);
-        if (dist>=threat_radius + drone_size + danger_dist)
+        if (dist>=threat_radius + drone_size + danger_dist + offset)
             threat_cost = 0;
-        elseif dist <= (threat_radius + drone_size)  % Collision
+        elseif dist <= (threat_radius + drone_size + offset)  % Collision
             threat_cost = J_inf;
         else  % danger
-            threat_cost = (threat_radius + drone_size + danger_dist) - dist;
+            threat_cost = (threat_radius + drone_size + danger_dist + offset) - dist;
         end
 
         F1 = F1 + threat_cost;
     end
 
     %==============================================
-    %% F2 safety altitude
-%     hmax = model.zmax;
-%     hmin = model.zmin;
-%     F2 = 0;
-%     
-%     if z_abs>hmax | z_abs<hmin
-%         F2 = J_inf;
-%     end
-        
-    %==============================================
-    %% F3 - Angle cost
-    anglemax = varmax.alpha;
+    %% F2 - Angle cost
+%     anglemax = varmax.alpha;
     
     currentState.Position.zabs = currentState.Position.z + H(round(currentState.Position.y),round(currentState.Position.x));
     target.zabs = target.z + H(round(target.y),round(target.x));
@@ -70,33 +61,37 @@ function cost=MyCost(sol,currentState,target,model,varmax,varmin)
 
     angle = atan2(norm(cross(segment1,segment2)),dot(segment1,segment2));
 
-    F3 = 180*abs(angle);
-%     if abs(angle) > anglemax
-%         F3 = J_inf;
+%     F2 = 180*abs(angle);
+% %     if abs(angle) < varmax.alpha
+        F2 = 180*abs(angle)/pi;
 %     else
-%         F3 = 180*abs(angle);
+%         F2 = J_inf;
 %     end
-    
-    %% F4 limit searching range
-    rmax = varmax.r; 
-    rmin = varmin.r;
+
+    %==============================================
+    %% F3 farthest in sensing range 
     r = norm(segment1);
-    F4 = 0;
+    F3 = varmax.sen - r;
+    if F3 < 0
+        F3 = J_inf;
+    end
+
+    %==============================================
+    %% F4 farthest in communication range
+    segment3 = [x; y; z_abs] - start';
+    r = norm(segment3);
+    F4 = varmax.com - r;
     
-    if r>rmax || r<rmin
+    if F4 < 0
         F4 = J_inf;
-    else
-        F4 = abs(r-(rmax+rmin)/2);
     end
     
     %============================================
     % Weight coeffcients
-    b1 = 1;
+    b1 = 10;
     b2 = 1;
     b3 = 1;
     b4 = 1;
     % Overall cost
-    cost = b1*F1 + b3*F3 + b4*F4;
-%     cost = [F1 F2 F3 F4];
-%     disp([F1 F3 F4]);
+    cost = b1*F1 + b2*F2 + b3*F3 + b4*F4;
 end

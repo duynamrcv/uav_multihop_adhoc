@@ -1,4 +1,4 @@
-function [newPoint, BestCost] = PSO(currentState,model,VarMax,VarMin)
+function [newPoint, BestCost] = PSO(start,currentState,model,VarMax,VarMin)
 
     %% PSO parameter
     MaxIt = 100;
@@ -32,7 +32,7 @@ function [newPoint, BestCost] = PSO(currentState,model,VarMax,VarMin)
     target.y = model.goal(2);
     target.z = model.goal(3);
 
-    CostFunction=@(x) MyCost(x,currentState,target,model,VarMax,VarMin);
+    CostFunction=@(x) MyCost(x,start,currentState,target,model,VarMax,VarMin);
     
     % Initialize Global Best
     GlobalBest.Cost=inf; % Minimization problem
@@ -160,14 +160,10 @@ function [newPoint, BestCost] = PSO(currentState,model,VarMax,VarMin)
         w=w*wdamp;
 
         % Update Best Cost Ever Found
-        BestCost(it)=GlobalBest;
+        BestCost(it)=GlobalBest.Cost;
         
         % Show Iteration Information
-        disp(['Iteration ' num2str(it) ': Best Cost = ' num2str(BestCost(it).Cost)]);
-        
-        if BestCost(it).Cost < 0.1
-            break;
-        end
+        disp(['Iteration ' num2str(it) ': Best Cost = ' num2str(BestCost(it))]);
 
     end
 

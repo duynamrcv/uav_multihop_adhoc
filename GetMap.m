@@ -20,5 +20,5 @@ function obstacles = GetMap(point,model,range)
            obstacles = [obstacles threat];
         end
     end
-    % return obstacles;
+%     obstacles
 end

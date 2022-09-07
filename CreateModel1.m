@@ -20,37 +20,37 @@ function model=CreateModel1()
     R1=30;  % Radius
     x1 = 400; y1 = 500; z1 = 100; % center
 
-    R3=35;  % Radius
+    R3=30;  % Radius
     x3 = 500; y3 = 350; z3 = 150; % center
 
-    R4=40;  % Radius
+    R4=30;  % Radius
     x4 = 300; y4 = 200; z4 = 150; % center
 
-    R5=50;  % Radius
+    R5=30;  % Radius
     x5 = 650; y5 = 500; z5 = 150; % center
 
     R6=30;  % Radius
     x6 = 750; y6 = 750; z6 = 150; % center
     
-    R7=25;  % Radius
+    R7=35;  % Radius
     x7 = 200; y7 = 300; z7 = 150; % center
     
-    R8=40;  % Radius
-    x8 = 300; y8 = 500; z8 = 150; % center
+    R8=30;  % Radius
+    x8 = 300; y8 = 350; z8 = 150; % center
     
-    R9=50;  % Radius
-    x9 = 550; y9 = 600; z9 = 150; % center
+    R9=30;  % Radius
+    x9 = 450; y9 = 650; z9 = 150; % center
     
     R10=35;  % Radius
     x10 = 650; y10 = 650; z10 = 150; % center
     
-    R11=30;  % Radius
-    x11 = 400; y11 = 680; z11 = 150; % center
+    R11=50;  % Radius
+    x11 = 590; y11 = 550; z11 = 150; % center
     
-    R12=45;  % Radius
+    R12=35;  % Radius
     x12 = 800; y12 = 400; z12 = 150; % center
     
-    R13=40;  % Radius
+    R13=30;  % Radius
     x13 = 850; y13 = 650; z13 = 150; % center
  
     % Start and end position

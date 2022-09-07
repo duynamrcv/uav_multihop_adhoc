@@ -42,6 +42,8 @@ ys=model.start(2);
 zs=model.start(3);
 plot3(xs,ys,zs,'ks','MarkerSize',10,'MarkerFaceColor','k');
 
+plot3(2.541482205754813e+02,1.798824864400457e+02,3.388946228027344e+02,'rd','MarkerSize',10,'MarkerFaceColor','r');
+
 % Goal location
 xg=model.goal(1);
 yg=model.goal(2);

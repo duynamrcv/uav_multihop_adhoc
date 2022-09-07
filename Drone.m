@@ -1,6 +1,9 @@
 classdef Drone < handle
     %% Drone properties
     properties
+       com_range = 300.0;
+       sen_range = 50.0;
+       
        id
        connect_id
 
@@ -12,11 +15,11 @@ classdef Drone < handle
        radius
        path
        
-       best_cost
+       best_cost = []
        
        state    % 0 = unassigned, 1 = assigned, 2 = occupied
        
-       target           % the target need to occupied
+       target = []      % store the PSO target
        nearest_target   % the target follow
        next_target      % the next target to assign new uav
     end
@@ -24,22 +27,22 @@ classdef Drone < handle
     %% Control parameters
     properties
         % Moving to goal parameters
-        a_m2g = 20.0;
+        a_m2g = 30.0;
         b_m2g = 20.0;
         
         % Avoiding threats parameters
-        a_ath = 10.0;
-        b_ath = 50.0;
+        a_ath = 30.0;
+        b_ath = 15.0;
         
         % Avoiding drones parameters
-        a_adr = 10.0;
+        a_adr = 30.0;
         b_adr = 20.0;
     end
     
     %% Methods
     methods
         % Constructor
-        function obj = Drone(id, position, heading, radius, target)
+        function obj = Drone(id, position, heading, radius)
             obj.id = id;
             obj.connect_id = 1;
             obj.position = position;
@@ -49,30 +52,30 @@ classdef Drone < handle
             
             obj.state = 0;
             
-            obj.target = target;
-            
             obj.distance = 0;
             obj.time = 0;
         end
         
         % Search next target
-        function obj = search_next_target(obj, model,VarMax,VarMin)
+        function obj = search_next_target(obj,model,start,VarMax,VarMin)
             % Run PSO
             disp('Searching ...');
             tic();
             % obj.next_target = model.goals(obj.id,:);
-            if norm(obj.position - model.goal) > VarMax.r
+            if norm(obj.position - model.goal) > obj.sen_range
                 currentState.Position.x = obj.position(1);
                 currentState.Position.y = obj.position(2);
                 currentState.Position.z = obj.position(3);
 
-                currentState.Threats = GetMap(currentState.Position,model,VarMax.r);
-                [obj.next_target, obj.best_cost] = PSO(currentState,model,VarMax,VarMin);
+                currentState.Threats = GetMap(currentState.Position,model,obj.sen_range);
+                [obj.next_target, cost] = PSO(start,currentState,model,VarMax,VarMin);
+                obj.best_cost = [obj.best_cost;cost];
                 obj.next_target(3) = obj.next_target(3) + model.H(round(obj.next_target(2)),...
                                                                 round(obj.next_target(1)));
             else
                 obj.next_target = model.goal;
             end
+            obj.target = [obj.target; obj.next_target];
             obj.time = obj.time + toc();
         end
         
@@ -82,10 +85,10 @@ classdef Drone < handle
         end
         
         % Control signal
-        function vel = control_signal(obj, model, uavs)
+        function vel = control_signal(obj, model, uavs, target)
             % Move to goal
-            d_m2g = norm(obj.nearest_target - obj.position);
-            v_m2g = (obj.nearest_target - obj.position)/d_m2g;
+            d_m2g = norm(target - obj.position);
+            v_m2g = (target - obj.position)/d_m2g;
             f_m2g = obj.a_m2g;
             if d_m2g <= obj.b_m2g
                 f_m2g = obj.a_m2g*d_m2g/obj.b_m2g;
@@ -139,39 +142,37 @@ classdef Drone < handle
         
         % Multi target tracking
         function obj = multi_target_tracking(obj,model,uavs,dt,VarMax,VarMin)
-            iter = 0;
-            while obj.state ~= 2 && iter < 10000
-                if obj.id == 1
-                    obj.nearest_target = obj.target;
-                    obj.state = 1;
-                end
-                
-                if obj.state ~= 1   % unassigned
-                    obj = obj.search_nearest_target(uavs);
-                    obj.state = 1;
-                else
-                    vel = obj.control_signal(model, uavs);
+            id = 1;
+            % Moving to farthest drone
+            while id < obj.id
+                disp(['Moveing to Drone ', num2str(id)]);
+                while norm(obj.position - uavs(id).position) > 20
+                    vel = obj.control_signal(model, uavs, uavs(id).position);
                     obj = obj.update_position(vel, dt);
-                    
-                    % check position
-                    if norm(obj.position - obj.target) < 1
-                        obj.state = 2;  % occupied
-                    else
-                        if all(obj.nearest_target ~= obj.target)...
-                                && (norm(obj.position - obj.nearest_target)...
-                                - obj.radius - uavs(obj.connect_id).radius < 30)
-                            obj = obj.search_nearest_target(uavs);
-                            obj.connect_id = obj.connect_id + 1;
-                        end
-                    end
                 end
-                iter = iter +1;
+                id = id + 1;
             end
             
-%             if obj.id <= size(model.goals, 1)
-            if obj.nearest_target ~= model.goal
-                obj = obj.search_next_target(model,VarMax,VarMin);
+            % Get start adhoc node
+            if id == 1
+                start = model.start;
+            else
+                start = uavs(id-1).position;
             end
+            
+            while norm(obj.position - start) < obj.com_range - 10
+                % Searching next temporary target
+                obj = obj.search_next_target(model,start,VarMax,VarMin);
+                % Moving to the next temporary target
+                while norm(obj.position - obj.next_target) > 5
+                    vel = obj.control_signal(model, uavs, obj.next_target);
+                    obj = obj.update_position(vel, dt);
+                end
+                if all(obj.next_target == model.goal)
+                    break;
+                end
+            end
+            
         end
         
         % Draw function

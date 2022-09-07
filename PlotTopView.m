@@ -45,34 +45,46 @@ for i = 1:threat_num
     end
 end
 
+p = [];
+% Plot paths
+for i = size(sol, 1):-1:1
+    p(i) = plot3(sol(i).path(:,1), sol(i).path(:,2), sol(i).path(:,3),...
+        '-', 'LineWidth', 2, 'DisplayName', ['UAV', num2str(i)]);
+end
+
+% plot target
+all_marks = {'s','d','h','>','^','v','o','p','<'};
+for j = 1:size(sol, 1)
+    k = size(sol(j).target,1);
+    scatter3(sol(j).target(1:k-1,1),...
+            sol(j).target(1:k-1,2),...
+            sol(j).target(1:k-1,3),...
+            40,'k','fill', 'Marker', all_marks{mod(j,9)});
+    
+    % Final location
+    xf=sol(j).target(k,1);
+    yf=sol(j).target(k,2);
+    zf=sol(j).target(k,3);
+    p(size(sol,1)+1) = plot3(xf,yf,zf,'bo','MarkerSize',8,...
+                            'MarkerFaceColor','b',...
+                            'DisplayName', 'Ad-hoc node');
+end
+
 % Start location
 xs=model.start(1);
 ys=model.start(2);
 zs=model.start(3);
 
-% plot target
-for j = 1:size(sol, 1)
-    % Final location
-    xf=sol(j).target(1);
-    yf=sol(j).target(2);
-    zf=sol(j).target(3);
-   
-    % plot target point
-    plot3(xf,yf,zf,'ko','MarkerSize',7,'MarkerFaceColor','k');
-end
+p(size(sol,1)+2)=plot3(xs,ys,zs,'bs','MarkerSize',10,...
+                        'MarkerFaceColor','b', 'DisplayName', 'Base station');
 
-p = [];
-% plot start point
-p(1)=plot3(xs,ys,zs,'ks','MarkerSize',10,'MarkerFaceColor','k', 'DisplayName', 'Base station');
-% plot3(xs,ys,zs+50,'ko','MarkerSize',7,'MarkerFaceColor','k');
+% Start location
+xf=model.goal(1);
+yf=model.goal(2);
+zf=model.goal(3);
+p(size(sol,1)+3)=plot3(xf,yf,zf,'rp','MarkerSize',10,...
+                        'MarkerFaceColor','r', 'DisplayName', 'Target');
 
-% Plot paths
-for i = size(sol, 1):-1:1
-    if i ~= 1
-        p(i) = plot3(sol(i).path(:,1), sol(i).path(:,2), sol(i).path(:,3),...
-            '-', 'LineWidth', 2, 'DisplayName', ['UAV', num2str(i-1)]);
-    end
-end
 legend(p,'Location', 'best');
 % title('Search and Rescue');
 view([0 90]);
