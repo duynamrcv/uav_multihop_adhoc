@@ -7,7 +7,7 @@ N.D.T Thuy, D.N Bui, M.D Phung and H.P Duy, 'Deployment of UAVs for Optimal Mult
 ![iteration](results/1_interation.png)
 
 ## Cite this
-The paper is available in [here](doc/2022_ICCAIS.pdf). If you use our study in an academic work, please cite:
+The paper is available in [here](https://www.researchgate.net/publication/365787872_Deployment_of_UAVs_for_Optimal_Multihop_Ad-hoc_Networks_Using_Particle_Swarm_Optimization_and_Behavior-based_Control). If you use our study in an academic work, please cite:
 ```
 @INPROCEEDINGS{Ngan2022,
   author={Ngan Duong Thi Thuy and Duy Nam Bui and Manh Duong Phung and Hung Pham Duy},
